@@ -5,8 +5,7 @@
 
 /* ================== CONFIG ================== */
 // 1) Paste your Google Apps Script Web App URL here (see README.md).
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwkXJ-BE0yP31Gn-OfDBkBpIIDdSdE3MFFCj5usV1qhiMta4Ehc-7cNNuBXVPrrvCBQxA/exec";
-
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZvAvcat1X9Hg0OLrpzwY0oTqhO5bEN0D_Hly7fpExyXXzgsB9u-8WPSgOyiw5J7purQ/exec";
 // 2) Event moment. Includes a timezone offset so every guest counts down to the same instant.
 //    Cairo in October = +03:00. Change the time if the party starts later than midnight.
 const WEDDING_DATE = new Date("2026-10-03T17:00:00+03:00");
@@ -62,7 +61,7 @@ const PHOTOS = [
 //    To load approved notes from your Google Sheet instead: deploy the Apps Script, set the flag below
 //    to true, and type "yes" in the "Approved" column (D) of the Messages sheet for notes to show.
 const guestMessages = [];
-const LOAD_GUESTBOOK_FROM_SHEET = false;
+const LOAD_GUESTBOOK_FROM_SHEET = true;
 /* ============ END CONFIG ============ */
 
 (() => {
@@ -175,19 +174,84 @@ function tick() {
 const clock = setInterval(tick, 1000);
 tick();
 
-/* ---------- guestbook ---------- */
-const notes = $("#notes"); let noteCount = 0;
+/* ---------- guestbook & persistent message wall ---------- */
+const notes = $("#notes");
+let noteCount = 0;
+const seenNotes = new Set();
+
+function getCachedNotes() {
+  try {
+    const raw = localStorage.getItem("br_wedding_guest_notes");
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCachedNotes(list) {
+  try {
+    localStorage.setItem("br_wedding_guest_notes", JSON.stringify(list));
+  } catch (e) {}
+}
+
 function addNote(m, fresh) {
+  if (!m || !m.name || !m.message) return;
+  const key = `${m.name.trim().toLowerCase()}:::${m.message.trim().toLowerCase()}`;
+  if (seenNotes.has(key)) return;
+  seenNotes.add(key);
+
+  if (fresh) {
+    const list = getCachedNotes();
+    const exists = list.some(c => c.name.trim().toLowerCase() === m.name.trim().toLowerCase() && c.message.trim().toLowerCase() === m.message.trim().toLowerCase());
+    if (!exists) {
+      list.unshift({ name: m.name.trim(), message: m.message.trim() });
+      saveCachedNotes(list);
+    }
+  }
+
   $(".blank", notes)?.remove();
   const n = document.createElement("blockquote"), p = document.createElement("p"), c = document.createElement("cite");
-  p.textContent = "“" + m.message + "”"; c.textContent = "— " + m.name;   // textContent: guest text is never parsed as HTML
-  n.className = "note rv" + (fresh ? " drop in" : ""); n.style.setProperty("--r", (((noteCount++ * 53) % 9) - 4) * .8 + "deg");
-  n.append(p, c); notes.prepend(n); if (!fresh) watch(n);
+  p.textContent = "“" + m.message.trim() + "”";
+  c.textContent = "— " + m.name.trim();
+  n.className = "note rv" + (fresh ? " drop in" : "");
+  n.style.setProperty("--r", (((noteCount++ * 53) % 9) - 4) * .8 + "deg");
+  n.append(p, c);
+  notes.prepend(n);
+  if (!fresh) watch(n);
 }
-function blankState() { if (!notes.children.length) notes.innerHTML = '<p class="blank">The first note is waiting to be written.</p>' }
-guestMessages.forEach(m => addNote(m)); blankState();
-if (LOAD_GUESTBOOK_FROM_SHEET && !GOOGLE_SCRIPT_URL.startsWith("YOUR_"))
-  fetch(GOOGLE_SCRIPT_URL + "?type=messages").then(r => r.json()).then(rows => { rows.forEach(m => addNote(m)); blankState() }).catch(() => {});
+
+function blankState() {
+  if (!notes.children.length) notes.innerHTML = '<p class="blank">The first note is waiting to be written.</p>';
+}
+
+// 1. Immediately load notes from config and localStorage (survives refresh 100%)
+const initialNotes = [...guestMessages, ...getCachedNotes()];
+initialNotes.forEach(m => addNote(m));
+blankState();
+
+// 2. Fetch live notes from Google Sheets and sync with all guests
+if (LOAD_GUESTBOOK_FROM_SHEET && !GOOGLE_SCRIPT_URL.startsWith("YOUR_")) {
+  fetch(GOOGLE_SCRIPT_URL + "?type=messages")
+    .then(r => r.json())
+    .then(rows => {
+      if (Array.isArray(rows) && rows.length > 0) {
+        const currentCache = getCachedNotes();
+        const mergedCache = [...currentCache];
+        rows.forEach(r => {
+          if (!r.name || !r.message) return;
+          const exists = mergedCache.some(c =>
+            c.name.trim().toLowerCase() === String(r.name).trim().toLowerCase() &&
+            c.message.trim().toLowerCase() === String(r.message).trim().toLowerCase()
+          );
+          if (!exists) mergedCache.push({ name: String(r.name).trim(), message: String(r.message).trim() });
+          addNote(r);
+        });
+        saveCachedNotes(mergedCache);
+      }
+      blankState();
+    })
+    .catch(() => {});
+}
 
 /* ---------- forms → Google Sheets ---------- */
 async function send(payload) {
@@ -299,7 +363,15 @@ wire($("#songForm"), f => ({ type: "song", name: f.name, song: f.song, platform:
   });
 });
 
-wire($("#msgForm"), f => ({ type: "message", name: f.name, message: f.message }), (f, card) => {
+wire($("#msgForm"), f => {
+  const list = getCachedNotes();
+  const exists = list.some(c => c.name.trim().toLowerCase() === f.name.trim().toLowerCase() && c.message.trim().toLowerCase() === f.message.trim().toLowerCase());
+  if (!exists) {
+    list.unshift({ name: f.name.trim(), message: f.message.trim() });
+    saveCachedNotes(list);
+  }
+  return { type: "message", name: f.name, message: f.message };
+}, (f, card) => {
   triggerEnvelope(card, {
     title: "Words for a Lifetime",
     desc: `“${f.message}”`,
