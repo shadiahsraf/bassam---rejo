@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bassam &amp; Rejoyce · 03 · 10 · 2026</title>
+<meta name="description" content="You are invited to the engagement of Bassam &amp; Rejoyce, October 3, 2026.">
+<meta name="theme-color" content="#FAF7F2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 0. TOP SECRET PROPOSAL OPENING ("DON'T TELL REJOYCE!") -->
+<div class="secret-overlay" id="secretOverlay" role="dialog" aria-modal="true" aria-label="Top Secret Proposal">
+  <div class="secret-backdrop"></div>
+  <div class="secret-card">
+    <div class="secret-card-inner">
+      <div class="secret-badge">
+        <span class="badge-icon">🤫</span>
+        <span class="badge-text">CONFIDENTIAL · TOP SECRET</span>
+      </div>
+      <h1 class="secret-title">Don't Tell Rejoyce!</h1>
+      <p class="secret-desc">A secret proposal is in the making...</p>
+
+      <div class="secret-seal-container">
+        <button type="button" class="secret-seal" id="secretSealBtn" aria-label="Break the seal to reveal the proposal">
+          <div class="secret-seal-stamp">
+            <span class="seal-icon">💍</span>
+            <span class="seal-initials">B &amp; R</span>
+          </div>
+          <div class="secret-seal-ring"></div>
+        </button>
+        <div class="secret-pulse-glow" aria-hidden="true"></div>
+      </div>
+
+      <button type="button" class="secret-btn" id="secretActionBtn">
+        <span class="btn-sparkle">✦</span>
+        <span class="btn-caption" id="secretBtnText">Break the Seal &amp; Enter</span>
+        <span class="btn-sparkle">✦</span>
+      </button>
+
+      <p class="secret-footer-note">Strictly for close family &amp; friends</p>
+    </div>
+  </div>
+</div>
+
+<!-- 1. COVER: printed-card opening; frame draws itself, then scroll turns the page -->
+<header class="cover" id="cover">
+  <div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="cover-in">
+    <div class="cover-monogram" aria-hidden="true">
+      <span class="crest-line"></span>
+      <span class="crest-text">B &amp; R</span>
+      <span class="crest-line"></span>
+    </div>
+    <h1><span>Bassam</span><em>&amp;</em><span>Rejoyce</span></h1>
+    <p class="date">03 · 10 · 2026</p>
+  </div>
+</header>
+
+<main>
+<!-- 2. HERO -->
+<section class="hero" id="hero">
+  <h2>Bassam &amp; Rejoyce</h2>
+  <p class="date">03 · 10 · 2026</p>
+  <p class="tag">One day.<br>Two hearts.<br>A lifetime ahead.</p>
+</section>
+
+<!-- 3. THEIR STORY (edit STORY in js/script.js) -->
+<section id="story">
+  <div class="story-header center">
+    <h2 class="rv">Their Story</h2>
+    <p class="sub rv">Every love story is beautiful, but ours is our favorite.</p>
+  </div>
+  <ol class="tl" id="timeline"></ol>
+</section>
+
+<!-- 4. COUNTDOWN (ROYAL WEDDING ARCH TIMEPIECE) -->
+<section class="center" id="countdown">
+  <h2 class="rv">Until The Day</h2>
+  <p class="sub rv">Counting every golden second until forever begins.</p>
+  <div class="clock" id="clock" role="timer" aria-label="Countdown to October 3, 2026">
+    <div class="arch-unit">
+      <div class="arch-card">
+        <span class="arch-crown">✦</span>
+        <span class="arch-val" id="cnt-days">00</span>
+        <span class="arch-lbl">Days</span>
+      </div>
+    </div>
+    <div class="arch-unit">
+      <div class="arch-card">
+        <span class="arch-crown">✦</span>
+        <span class="arch-val" id="cnt-hours">00</span>
+        <span class="arch-lbl">Hours</span>
+      </div>
+    </div>
+    <div class="arch-unit">
+      <div class="arch-card">
+        <span class="arch-crown">✦</span>
+        <span class="arch-val" id="cnt-minutes">00</span>
+        <span class="arch-lbl">Minutes</span>
+      </div>
+    </div>
+    <div class="arch-unit arch-pulse">
+      <div class="arch-card">
+        <span class="arch-crown">✦</span>
+        <span class="arch-val" id="cnt-seconds">00</span>
+        <span class="arch-lbl">Seconds</span>
+      </div>
+    </div>
+  </div>
+  <p class="today" id="today" hidden>Today is the day</p>
+</section>
+
+<!-- 5. MEMORY WALL (edit PHOTOS in js/script.js) -->
+<section id="memories">
+  <h2 class="rv">Memories</h2>
+  <p class="sub rv">Pinned up, slightly crooked, exactly as they were kept.</p>
+  <div class="wall" id="wall"></div>
+</section>
+
+<!-- 6. SONG REQUEST -->
+<section id="song">
+  <h2 class="rv">Pick a song for their day</h2>
+  <p class="sub rv">If there's a song you'd love to hear on their special day, leave it here.</p>
+  <div class="card">
+    <form id="songForm" novalidate>
+      <div class="field"><label for="sName">Your name</label><input id="sName" name="name" maxlength="80" autocomplete="name" required></div>
+      <div class="field"><label for="sSong">Song name</label><input id="sSong" name="song" maxlength="120" required></div>
+      <fieldset class="field pills"><legend>Platform</legend>
+        <label><input type="radio" name="platform" value="Spotify" checked><span>Spotify</span></label>
+        <label><input type="radio" name="platform" value="YouTube"><span>YouTube</span></label>
+        <label><input type="radio" name="platform" value="Anghami"><span>Anghami</span></label>
+        <label><input type="radio" name="platform" value="Other"><span>Other</span></label>
+      </fieldset>
+      <div class="field"><label for="sLink">Song link (optional)</label><input id="sLink" name="link" type="url" inputmode="url" maxlength="300" placeholder="https://"></div>
+      <button class="btn" type="submit">Add it to their soundtrack</button>
+      <p class="msg" role="alert"></p>
+    </form>
+    <div class="envelope-stage" hidden>
+      <div class="env-scene">
+        <div class="envelope">
+          <div class="env-back"></div>
+          <div class="env-paper">
+            <div class="env-paper-header"><span class="env-paper-badge">Bassam &amp; Rejoyce</span></div>
+            <div class="env-paper-body">
+              <p class="env-paper-title"></p>
+              <p class="env-paper-desc"></p>
+              <p class="env-paper-author"></p>
+            </div>
+          </div>
+          <div class="env-pocket"></div>
+          <div class="env-flap"></div>
+          <div class="wax-seal">
+            <div class="seal-base">
+              <div class="seal-rim"></div>
+              <div class="seal-content"><span class="seal-monogram">B&amp;R</span></div>
+            </div>
+            <div class="seal-ripple"></div>
+          </div>
+        </div>
+      </div>
+      <div class="env-celebration">
+        <div class="env-sparkles">✨</div>
+        <h3 class="env-status-title"></h3>
+        <p class="env-status-desc"></p>
+      </div>
+    </div>
+    <div class="thanks" hidden>Your song has been added to the soundtrack of their day.</div>
+  </div>
+</section>
+
+<!-- 7. LOCATION -->
+<section id="place">
+  <h2 class="rv">The place</h2>
+  <p class="sub rv">Where the story continues...</p>
+  <div class="map">
+    <iframe title="Map to the venue" src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3454.548190159343!2d31.215611575552867!3d30.021127074935368!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzDCsDAxJzE2LjEiTiAzMcKwMTMnMDUuNSJF!5e0!3m2!1sen!2seg!4v1790028512445!5m2!1sen!2seg" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+  <!-- Directions destination = lat,lng of the venue -->
+  <a class="btn ghost" id="directions" href="https://www.google.com/maps/dir/?api=1&destination=30.021127,31.215611" target="_blank" rel="noopener">Get directions</a>
+</section>
+
+<!-- 8. DRESS CODE (INTERACTIVE WARDROBE) -->
+<section id="dresscode">
+  <div class="center">
+    <h2 class="rv">Dress Code</h2>
+    <p class="sub rv">Semi-Formal &amp; Cocktail Chic · Tap any color below to try out your celebration look!</p>
+  </div>
+
+  <div class="dresscode-grid">
+    <!-- GENTLEMEN -->
+    <div class="card dresscode-card rv">
+      <div class="dresscode-header">
+        <span class="dresscode-badge">Gentlemen</span>
+        <h3 class="dresscode-title">Shirt &amp; White Trousers</h3>
+        <p class="dresscode-desc">Crisp white trousers paired with a tailored dress shirt in your favorite tone.</p>
+      </div>
+
+      <div class="dresscode-stage" id="manStage">
+        <div class="dresscode-img-frame">
+          <img src="images/dresscode-man-white.png" alt="White Shirt" class="dresscode-img active" data-color="white">
+          <img src="images/dresscode-man-sage.png" alt="Sage Green Shirt" class="dresscode-img" data-color="sage" loading="lazy">
+          <img src="images/dresscode-man-black.png" alt="Classic Black Shirt" class="dresscode-img" data-color="black" loading="lazy">
+          <img src="images/dresscode-man-champagne.png" alt="Sand Champagne Shirt" class="dresscode-img" data-color="champagne" loading="lazy">
+          <img src="images/dresscode-man-rose.png" alt="Dusty Rose Shirt" class="dresscode-img" data-color="rose" loading="lazy">
+          <img src="images/dresscode-man-navy.png" alt="Navy Blue Shirt" class="dresscode-img" data-color="navy" loading="lazy">
+        </div>
+      </div>
+
+      <div class="palette-control">
+        <div class="palette-status">
+          <span class="palette-caption">Shirt Color:</span>
+          <strong class="palette-name" id="manColorName">Crisp White</strong>
+        </div>
+        <div class="swatches" role="radiogroup" aria-label="Gentlemen Shirt Colors">
+          <button type="button" class="swatch active" data-color="white" data-name="Crisp White" style="--swatch-bg: #FAF7F2;" aria-label="Crisp White"></button>
+          <button type="button" class="swatch" data-color="sage" data-name="Sage Green" style="--swatch-bg: #8FA68B;" aria-label="Sage Green"></button>
+          <button type="button" class="swatch" data-color="black" data-name="Classic Black" style="--swatch-bg: #1A1A1A;" aria-label="Classic Black"></button>
+          <button type="button" class="swatch" data-color="champagne" data-name="Warm Champagne" style="--swatch-bg: #CDB68D;" aria-label="Warm Champagne"></button>
+          <button type="button" class="swatch" data-color="rose" data-name="Dusty Rose" style="--swatch-bg: #C48E98;" aria-label="Dusty Rose"></button>
+          <button type="button" class="swatch" data-color="navy" data-name="Classic Navy" style="--swatch-bg: #293E58;" aria-label="Classic Navy"></button>
+        </div>
+        <p class="dresscode-note">👖 White trousers stay crisp &amp; fixed</p>
+      </div>
+    </div>
+
+    <!-- LADIES -->
+    <div class="card dresscode-card rv">
+      <div class="dresscode-header">
+        <span class="dresscode-badge">Ladies</span>
+        <h3 class="dresscode-title">Summer Cocktail Dresses</h3>
+        <p class="dresscode-desc">Chic short summer dresses in romantic pastels, warm champagne, or rich jewel tones.</p>
+      </div>
+
+      <div class="dresscode-stage" id="womanStage">
+        <div class="dresscode-img-frame">
+          <img src="images/dresscode-woman-white.png" alt="White Dress" class="dresscode-img active" data-color="white">
+          <img src="images/dresscode-woman-rose.png" alt="Dusty Rose Dress" class="dresscode-img" data-color="rose" loading="lazy">
+          <img src="images/dresscode-woman-sage.png" alt="Sage Green Dress" class="dresscode-img" data-color="sage" loading="lazy">
+          <img src="images/dresscode-woman-champagne.png" alt="Champagne Gold Dress" class="dresscode-img" data-color="champagne" loading="lazy">
+          <img src="images/dresscode-woman-lavender.png" alt="Lavender Mist Dress" class="dresscode-img" data-color="lavender" loading="lazy">
+          <img src="images/dresscode-woman-burgundy.png" alt="Royal Burgundy Dress" class="dresscode-img" data-color="burgundy" loading="lazy">
+        </div>
+      </div>
+
+      <div class="palette-control">
+        <div class="palette-status">
+          <span class="palette-caption">Dress Color:</span>
+          <strong class="palette-name" id="womanColorName">Cocktail White</strong>
+        </div>
+        <div class="swatches" role="radiogroup" aria-label="Ladies Dress Colors">
+          <button type="button" class="swatch active" data-color="white" data-name="Cocktail White" style="--swatch-bg: #FAF7F2;" aria-label="Cocktail White"></button>
+          <button type="button" class="swatch" data-color="rose" data-name="Dusty Rose" style="--swatch-bg: #C98B96;" aria-label="Dusty Rose"></button>
+          <button type="button" class="swatch" data-color="sage" data-name="Sage Green" style="--swatch-bg: #9AB297;" aria-label="Sage Green"></button>
+          <button type="button" class="swatch" data-color="champagne" data-name="Champagne Gold" style="--swatch-bg: #D4AF67;" aria-label="Champagne Gold"></button>
+          <button type="button" class="swatch" data-color="lavender" data-name="Lavender Mist" style="--swatch-bg: #B5A8CD;" aria-label="Lavender Mist"></button>
+          <button type="button" class="swatch" data-color="burgundy" data-name="Royal Burgundy" style="--swatch-bg: #6B1C2A;" aria-label="Royal Burgundy"></button>
+        </div>
+        <p class="dresscode-note">✨ Pair with your favorite gold or nude heels</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. RSVP -->
+<section id="rsvp">
+  <h2 class="rv">Are you coming?</h2>
+  <div class="choices">
+    <button class="choice" type="button" data-a="yes" aria-pressed="false">I'll be there</button>
+    <button class="choice" type="button" data-a="no" aria-pressed="false">Sorry, I can't</button>
+  </div>
+  <div class="card" id="rsvpCard" hidden>
+    <form id="rsvpForm" novalidate>
+      <div class="field"><label for="rName">Your name</label><input id="rName" name="name" maxlength="80" autocomplete="name" placeholder="Write your name here" required></div>
+      <button class="btn" type="submit" id="rsvpBtn">Reserve my place 🥂</button>
+      <p class="msg" role="alert"></p>
+    </form>
+    <div class="envelope-stage" hidden>
+      <div class="env-scene">
+        <div class="envelope">
+          <div class="env-back"></div>
+          <div class="env-paper">
+            <div class="env-paper-header"><span class="env-paper-badge">Bassam &amp; Rejoyce</span></div>
+            <div class="env-paper-body">
+              <p class="env-paper-title"></p>
+              <p class="env-paper-desc"></p>
+              <p class="env-paper-author"></p>
+            </div>
+          </div>
+          <div class="env-pocket"></div>
+          <div class="env-flap"></div>
+          <div class="wax-seal">
+            <div class="seal-base">
+              <div class="seal-rim"></div>
+              <div class="seal-content"><span class="seal-monogram">B&amp;R</span></div>
+            </div>
+            <div class="seal-ripple"></div>
+          </div>
+        </div>
+      </div>
+      <div class="env-celebration">
+        <div class="env-sparkles">✨</div>
+        <h3 class="env-status-title"></h3>
+        <p class="env-status-desc"></p>
+      </div>
+    </div>
+    <div class="thanks" hidden></div>
+  </div>
+
+  <!-- If "Sorry, I can't": Dedicated sad card (no form, no sending) -->
+  <div class="card sad-response-card" id="rsvpSadCard" hidden>
+    <div class="sad-card-inner">
+      <div class="sad-icon-wrap" aria-hidden="true">
+        <span class="sad-big-emoji">🥺💔</span>
+      </div>
+      <h3 class="sad-card-title">Bassam is heartbroken!</h3>
+      <p class="sad-card-lead">بسام زعل خالص إنك مش هتيجي... 😢</p>
+      <p class="sad-card-desc">He was genuinely counting on having you celebrate by his side. You will be dearly missed!</p>
+      <button type="button" class="btn ghost sad-switch-btn" id="sadSwitchBtn">Wait, I changed my mind! (I'll be there 🥂)</button>
+    </div>
+  </div>
+</section>
+
+<!-- 9. MESSAGE -->
+<section id="message">
+  <h2 class="rv">Leave them a message</h2>
+  <p class="sub rv">Leave them something they'll want to read years from now.</p>
+  <div class="card">
+    <form id="msgForm" novalidate>
+      <div class="field"><label for="mName">Your name</label><input id="mName" name="name" maxlength="80" autocomplete="name" required></div>
+      <div class="field"><label for="mText">Your message</label><textarea id="mText" name="message" maxlength="800" required></textarea></div>
+      <button class="btn" type="submit">Seal my message</button>
+      <p class="msg" role="alert"></p>
+    </form>
+    <div class="envelope-stage" hidden>
+      <div class="env-scene">
+        <div class="envelope">
+          <div class="env-back"></div>
+          <div class="env-paper">
+            <div class="env-paper-header"><span class="env-paper-badge">Bassam &amp; Rejoyce</span></div>
+            <div class="env-paper-body">
+              <p class="env-paper-title"></p>
+              <p class="env-paper-desc"></p>
+              <p class="env-paper-author"></p>
+            </div>
+          </div>
+          <div class="env-pocket"></div>
+          <div class="env-flap"></div>
+          <div class="wax-seal">
+            <div class="seal-base">
+              <div class="seal-rim"></div>
+              <div class="seal-content"><span class="seal-monogram">B&amp;R</span></div>
+            </div>
+            <div class="seal-ripple"></div>
+          </div>
+        </div>
+      </div>
+      <div class="env-celebration">
+        <div class="env-sparkles">✨</div>
+        <h3 class="env-status-title"></h3>
+        <p class="env-status-desc"></p>
+      </div>
+    </div>
+    <div class="thanks" hidden>Your words are now part of their story.</div>
+  </div>
+</section>
+
+<!-- 10. GUESTBOOK (edit guestMessages in js/script.js) -->
+<section id="guestbook">
+  <h2 class="rv">Words they'll keep</h2>
+  <div class="notes" id="notes"></div>
+</section>
+
+<!-- 11. FINAL CHAPTER -->
+<section class="end" id="finale">
+  <div class="end-in">
+    <h2>And so,<br>a new chapter begins.</h2>
+    <p class="names">Bassam &amp; Rejoyce</p>
+    <p class="date">03 · 10 · 2026</p>
+    <p class="sign">With love,<br>Bassam &amp; Rejoyce</p>
+    <nav class="ctas" aria-label="Jump to">
+      <a class="btn" href="#song">Add a song</a>
+      <a class="btn" href="#message">Write a message</a>
+      <a class="btn" href="#rsvp">RSVP</a>
+    </nav>
+  </div>
+</section>
+</main>
+
+<!-- 12. MUSIC PLAYER (never autoplays) -->
+<button class="player" id="player" type="button" aria-pressed="false">
+  <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span><span id="playLabel">Play their song</span>
+</button>
+<audio id="audio" src="music/wedding-song.mp3" preload="none" loop></audio>
+
+<!-- 13. EASTER EGG -->
+<div class="egg" id="egg" aria-live="polite"><p>Okay... you're really excited.</p><p>Keep going. There's more.</p></div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
