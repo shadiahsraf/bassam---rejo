@@ -24,6 +24,23 @@ function doPost(e) {
   try {
     lock.waitLock(10000);
     const d = JSON.parse(e.postData.contents);
+
+    // Support deleting a message
+    if (d.type === "delete_message") {
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Messages");
+      if (!sheet) throw new Error("Missing tab: Messages");
+      const values = sheet.getDataRange().getValues();
+      for (let i = 1; i < values.length; i++) {
+        const rowName = String(values[i][1] || "").trim();
+        const rowMsg = String(values[i][2] || "").trim();
+        if (rowName === String(d.name || "").trim() && rowMsg === String(d.message || "").trim()) {
+          sheet.deleteRow(i + 1);
+          return json_({ ok: true, deleted: true });
+        }
+      }
+      return json_({ ok: true, deleted: false });
+    }
+
     const cfg = SHEETS[d.type];
     if (!cfg) throw new Error("Unknown type: " + d.type);
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(cfg.tab);

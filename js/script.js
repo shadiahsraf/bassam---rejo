@@ -178,6 +178,7 @@ tick();
 const notes = $("#notes");
 let noteCount = 0;
 const seenNotes = new Set();
+const isAdmin = () => location.search.includes("admin") || location.hash.includes("admin");
 
 function getCachedNotes() {
   try {
@@ -194,64 +195,127 @@ function saveCachedNotes(list) {
   } catch (e) {}
 }
 
+function blankState() {
+  if (notes && !notes.children.length) {
+    notes.innerHTML = '<p class="blank">The first note is waiting to be written.</p>';
+  }
+}
+
 function addNote(m, fresh) {
-  if (!m || !m.name || !m.message) return;
-  const key = `${m.name.trim().toLowerCase()}:::${m.message.trim().toLowerCase()}`;
+  if (!m || !m.name || !m.message || !notes) return;
+  const nameStr = String(m.name).trim();
+  const msgStr = String(m.message).trim();
+  const key = `${nameStr.toLowerCase()}:::${msgStr.toLowerCase()}`;
   if (seenNotes.has(key)) return;
   seenNotes.add(key);
 
   if (fresh) {
     const list = getCachedNotes();
-    const exists = list.some(c => c.name.trim().toLowerCase() === m.name.trim().toLowerCase() && c.message.trim().toLowerCase() === m.message.trim().toLowerCase());
+    const exists = list.some(c => c.name.trim().toLowerCase() === nameStr.toLowerCase() && c.message.trim().toLowerCase() === msgStr.toLowerCase());
     if (!exists) {
-      list.unshift({ name: m.name.trim(), message: m.message.trim() });
+      list.unshift({ name: nameStr, message: msgStr });
       saveCachedNotes(list);
     }
   }
 
   $(".blank", notes)?.remove();
-  const n = document.createElement("blockquote"), p = document.createElement("p"), c = document.createElement("cite");
-  p.textContent = "“" + m.message.trim() + "”";
-  c.textContent = "— " + m.name.trim();
+  const n = document.createElement("blockquote");
+  const p = document.createElement("p");
+  const c = document.createElement("cite");
+  p.textContent = "“" + msgStr + "”";
+  c.textContent = "— " + nameStr;
   n.className = "note rv" + (fresh ? " drop in" : "");
   n.style.setProperty("--r", (((noteCount++ * 53) % 9) - 4) * .8 + "deg");
   n.append(p, c);
-  notes.prepend(n);
-  if (!fresh) watch(n);
+
+  // If in admin mode, show a quick delete button on the card
+  if (isAdmin()) {
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "note-del-btn";
+    delBtn.title = "Delete this message";
+    delBtn.textContent = "✕ Delete";
+    delBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (!confirm(`Delete message from "${nameStr}"?`)) return;
+
+      n.style.transition = "all .3s ease";
+      n.style.opacity = "0";
+      n.style.transform = "scale(.8)";
+      setTimeout(() => {
+        n.remove();
+        blankState();
+      }, 300);
+
+      // Remove from local cache
+      const list = getCachedNotes().filter(item => !(item.name.trim().toLowerCase() === nameStr.toLowerCase() && item.message.trim().toLowerCase() === msgStr.toLowerCase()));
+      saveCachedNotes(list);
+
+      // Request deletion from Google Sheets
+      try {
+        await send({ type: "delete_message", name: nameStr, message: msgStr });
+      } catch (err) {}
+    });
+    n.appendChild(delBtn);
+  }
+
+  if (fresh) {
+    notes.prepend(n);
+  } else {
+    notes.appendChild(n);
+    watch(n);
+  }
 }
 
-function blankState() {
-  if (!notes.children.length) notes.innerHTML = '<p class="blank">The first note is waiting to be written.</p>';
+function renderNotesList(list) {
+  if (!notes) return;
+  notes.innerHTML = "";
+  seenNotes.clear();
+  noteCount = 0;
+  if (Array.isArray(list) && list.length > 0) {
+    list.forEach(m => addNote(m, false));
+  }
+  blankState();
 }
 
-// 1. Immediately load notes from config and localStorage (survives refresh 100%)
+// 1. Immediately load notes from config and cache
 const initialNotes = [...guestMessages, ...getCachedNotes()];
-initialNotes.forEach(m => addNote(m));
-blankState();
+renderNotesList(initialNotes);
 
-// 2. Fetch live notes from Google Sheets and sync with all guests
-if (LOAD_GUESTBOOK_FROM_SHEET && !GOOGLE_SCRIPT_URL.startsWith("YOUR_")) {
-  fetch(GOOGLE_SCRIPT_URL + "?type=messages")
+// 2. Fetch live notes from Google Sheets as the master source of truth
+function syncGuestbookFromSheet() {
+  if (!LOAD_GUESTBOOK_FROM_SHEET || GOOGLE_SCRIPT_URL.startsWith("YOUR_")) return;
+
+  fetch(GOOGLE_SCRIPT_URL + "?type=messages&t=" + Date.now())
     .then(r => r.json())
     .then(rows => {
-      if (Array.isArray(rows) && rows.length > 0) {
-        const currentCache = getCachedNotes();
-        const mergedCache = [...currentCache];
-        rows.forEach(r => {
-          if (!r.name || !r.message) return;
-          const exists = mergedCache.some(c =>
-            c.name.trim().toLowerCase() === String(r.name).trim().toLowerCase() &&
-            c.message.trim().toLowerCase() === String(r.message).trim().toLowerCase()
-          );
-          if (!exists) mergedCache.push({ name: String(r.name).trim(), message: String(r.message).trim() });
-          addNote(r);
-        });
-        saveCachedNotes(mergedCache);
+      if (Array.isArray(rows)) {
+        const validRows = rows
+          .filter(r => r && r.name && r.message && String(r.name).trim() && String(r.message).trim())
+          .map(r => ({ name: String(r.name).trim(), message: String(r.message).trim() }));
+
+        // In Google Sheets, rows are chronological (oldest first).
+        // Reverse so that the latest message appears first at the top of the guestbook.
+        const newestFirst = [...validRows].reverse();
+
+        // Overwrite local cache with authoritative active rows
+        saveCachedNotes(newestFirst);
+
+        // Re-render notes: any comment deleted in Google Sheets will immediately vanish!
+        renderNotesList(newestFirst);
       }
-      blankState();
     })
     .catch(() => {});
 }
+
+syncGuestbookFromSheet();
+
+// Auto-sync when returning to the tab (e.g. after editing/deleting in Google Sheets)
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") syncGuestbookFromSheet();
+});
+window.addEventListener("focus", syncGuestbookFromSheet);
+window.addEventListener("hashchange", () => renderNotesList(getCachedNotes()));
 
 /* ---------- forms → Google Sheets ---------- */
 async function send(payload) {
