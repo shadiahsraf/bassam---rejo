@@ -63,7 +63,7 @@ h2 {
 section { padding: clamp(5rem, 15vw, 8.5rem) var(--pad); max-width: 1120px; margin-inline: auto; position: relative; }
 .center { text-align: center; }
 .sub { font: italic 300 clamp(1.2rem, 3.6vw, 1.7rem)/1.4 var(--serif); color: var(--mute); max-width: 36ch; margin-inline: auto; }
-.date { font: 500 .9rem var(--sans); letter-spacing: .45em; color: var(--gold-deep); }
+.date { font: 500 clamp(.8rem, 2.4vw, .92rem) var(--sans); letter-spacing: clamp(.18em, 1.8vw, .35em); color: var(--gold-deep); }
 .rv { opacity: 0; translate: 0 20px; transition: opacity 1s cubic-bezier(.2, .8, .2, 1), translate 1s cubic-bezier(.2, .8, .2, 1); }
 .rv.in { opacity: 1; translate: none; }
 

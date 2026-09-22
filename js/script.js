@@ -9,7 +9,7 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwkXJ-BE0yP31
 
 // 2) Event moment. Includes a timezone offset so every guest counts down to the same instant.
 //    Cairo in October = +03:00. Change the time if the party starts later than midnight.
-const WEDDING_DATE = new Date("2026-10-03T00:00:00+03:00");
+const WEDDING_DATE = new Date("2026-10-03T17:00:00+03:00");
 
 // 3) Their story. Add, remove or reword entries freely.
 const STORY = [
