@@ -597,9 +597,89 @@ form.loading .btn::after { content: " …"; }
 .thanks { font: italic 300 clamp(1.7rem, 5.5vw, 2.6rem)/1.2 var(--serif); color: var(--wine); padding: 1rem 0; animation: rise 1.2s both; }
 
 /* ===== PLACE & MAP (WARM GOLDEN GLOW) ===== */
+.venue-card {
+  max-width: 620px;
+  margin: 2.2rem auto 0;
+  padding: clamp(1.6rem, 4.5vw, 2.4rem);
+  background: #FFFFFF;
+  border: 1.5px solid var(--champ);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 36px -12px rgba(180, 140, 60, 0.22), 0 2px 8px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: .65rem;
+  position: relative;
+  transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+.venue-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 42px -10px rgba(180, 140, 60, 0.32);
+  border-color: var(--gold-main);
+}
+.venue-icon-wrap {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201, 158, 57, 0.15) 0%, rgba(245, 230, 190, 0.35) 100%);
+  border: 1.5px solid var(--gold-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.65rem;
+  box-shadow: 0 4px 14px rgba(201, 158, 57, 0.25);
+  margin-bottom: .2rem;
+}
+.venue-badge {
+  display: inline-block;
+  font-size: .68rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: var(--champ-soft);
+  padding: .28rem .75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-bottom: .25rem;
+}
+.venue-name {
+  font-family: var(--serif);
+  font-size: clamp(1.75rem, 5.5vw, 2.45rem);
+  font-weight: 600;
+  color: var(--wine);
+  margin: 0;
+  line-height: 1.25;
+}
+.venue-address {
+  font-size: clamp(1.05rem, 3.2vw, 1.25rem);
+  color: var(--ink);
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.45;
+}
+.venue-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  flex-wrap: wrap;
+  margin-top: .4rem;
+  padding: .45rem 1.1rem;
+  background: #FFFDF9;
+  border: 1px dashed var(--champ);
+  border-radius: var(--radius-pill);
+  font-size: .88rem;
+  color: var(--gold-deep);
+  font-weight: 500;
+}
+.venue-meta-sep {
+  opacity: .5;
+}
+
 .map {
   position: relative;
-  margin-top: 2.5rem;
+  margin-top: 2rem;
   padding: .8rem;
   background: #FFFFFF;
   border: 1.5px solid var(--champ);
